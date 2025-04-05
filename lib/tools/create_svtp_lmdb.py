@@ -43,7 +43,7 @@ def createDataset(outputPath, imagePathList, labelList, lexiconList=None, checkV
   """
   assert(len(imagePathList) == len(labelList))
   nSamples = len(imagePathList)
-  env = lmdb.open(outputPath, map_size=1099511627776)
+  env = lmdb.open(outputPath, map_size=1e8)
   cache = {}
   cnt = 1
   for i in range(nSamples):
@@ -79,19 +79,20 @@ def createDataset(outputPath, imagePathList, labelList, lexiconList=None, checkV
   print('Created dataset with %d samples' % nSamples)
 
 if __name__ == "__main__":
-  data_dir = '/data/mkyang/datasets/English/benchmark/svtp/'
-  lmdb_output_path = '/data/mkyang/datasets/English/benchmark_lmdbs_new/svt_p_645'
-  gt_file = os.path.join(data_dir, 'gt.txt')
+  data_dir = './data/archive/recognition_datasets/SVTP'
+  lmdb_output_path = './data/SVTP_lmdb'
+
+  gt_file = os.path.join(data_dir, 'label.csv')
   image_dir = data_dir
   with open(gt_file, 'r') as f:
     lines = [line.strip('\n') for line in f.readlines()]
 
   imagePathList, labelList = [], []
   for i, line in enumerate(lines):
-    splits = line.split(' ')
+    splits = line.split(',')
     image_name = splits[0]
     gt_text = splits[1]
-    print(image_name, gt_text)
+    #print(image_name, gt_text)
     imagePathList.append(os.path.join(image_dir, image_name))
     labelList.append(gt_text)
 

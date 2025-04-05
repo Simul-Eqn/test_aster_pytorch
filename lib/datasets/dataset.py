@@ -197,7 +197,8 @@ class AlignCollate(object):
 def test():
   # lmdb_path = "/share/zhui/reg_dataset/NIPS2014"
   lmdb_path = "/share/zhui/reg_dataset/IIIT5K_3000"
-  train_dataset = LmdbDataset(root=lmdb_path, voc_type='ALLCASES_SYMBOLS', max_len=50)
+  import math 
+  train_dataset = LmdbDataset(root=lmdb_path, voc_type='ALLCASES_SYMBOLS', max_len=50, num_samples=math.inf)
   batch_size = 1
   train_dataloader = data.DataLoader(
         train_dataset,
