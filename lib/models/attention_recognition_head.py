@@ -6,6 +6,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 from torch.nn import init
+import numpy as np 
 
 
 class AttentionRecognitionHead(nn.Module):
@@ -79,12 +80,12 @@ class AttentionRecognitionHead(nn.Module):
 
     # Initialize the decoder
     state = torch.zeros(1, batch_size * beam_width, self.sDim)
-    pos_index = (torch.Tensor(range(batch_size)) * beam_width).long().view(-1, 1)
+    pos_index = (torch.tensor(range(batch_size)) * beam_width).long().view(-1, 1)
 
     # Initialize the scores
-    sequence_scores = torch.Tensor(batch_size * beam_width, 1)
-    sequence_scores.fill_(-float('Inf'))
-    sequence_scores.index_fill_(0, torch.Tensor([i * beam_width for i in range(0, batch_size)]).long(), 0.0)
+    sequence_scores = torch.tensor(np.ones(batch_size * beam_width)).view(-1,1)
+    sequence_scores.fill_(torch.tensor(-float('Inf')))
+    sequence_scores.index_fill_(0, torch.tensor([i * beam_width for i in range(0, batch_size)]).long(), 0.0)
     # sequence_scores.fill_(0.0)
 
     # Initialize the input vector
@@ -109,7 +110,7 @@ class AttentionRecognitionHead(nn.Module):
 
       # Update fields for next timestep
       predecessors = (candidates / self.num_classes + pos_index.expand_as(candidates)).view(batch_size * beam_width, 1)
-      state = state.index_select(1, predecessors.squeeze())
+      state = state.index_select(1, torch.round(predecessors.squeeze()).to(torch.int64).clamp(0, state.shape[1]-1))
 
       # Update sequence socres and erase scores for <eos> symbol so that they aren't expanded
       stored_scores.append(sequence_scores.clone())
@@ -140,6 +141,8 @@ class AttentionRecognitionHead(nn.Module):
     # add pos_index for indexing variable with b*k as the first dimension.
     t_predecessors = (sorted_idx + pos_index.expand_as(sorted_idx)).view(batch_size * beam_width)
     while t >= 0:
+      t_predecessors = t_predecessors.to(torch.int64)
+      #print(type(t_predecessors))
       # Re-order the variables with the back pointer
       current_symbol = stored_emitted_symbols[t].index_select(0, t_predecessors)
       t_predecessors = stored_predecessors[t].index_select(0, t_predecessors).squeeze()

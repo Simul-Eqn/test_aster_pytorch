@@ -48,6 +48,7 @@ class SyntheticDataset(data.Dataset):
         
         ## fill with the padding token
         label = np.full((self.max_len,), self.char2id[self.PADDING], dtype=np.int32)
+        
         label_list = []
         for char in text:
             if char in self.char2id:
@@ -63,7 +64,7 @@ class SyntheticDataset(data.Dataset):
         label[:len(label_list)] = np.array(label_list)
 
 
-        return img, label_list, len(label_list) # img is an Image.Image 
+        return img, label, len(label) # img is an Image.Image 
 
 
 # image sizing and keep aspect ratio are handled by AlignCollate in lib.datasets.dataset.py 

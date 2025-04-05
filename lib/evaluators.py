@@ -40,6 +40,7 @@ class BaseEvaluator(object):
     file_names = []
 
     end = time.time()
+    #print("BATCH SIZE", data_loader.batch_size)
     for i, inputs in enumerate(data_loader):
       data_time.update(time.time() - end)
 
@@ -55,6 +56,8 @@ class BaseEvaluator(object):
 
       images.append(input_dict['images'])
       targets.append(input_dict['rec_targets'])
+      #print(input_dict['rec_targets'])
+      #print("NUM TARGETS:", len(targets))
       losses.append(total_loss_batch)
       if global_args.evaluate_with_lexicon:
         file_names += input_dict['file_name']
@@ -98,6 +101,9 @@ class BaseEvaluator(object):
         print('lexiconfull: {0}, {1:.3f}'.format(self.metric, eval_res[3]))
         eval_res = eval_res[0]
       else:
+        #print("PRED REC:", outputs['pred_rec'].shape)
+        #print(outputs['pred_rec'][0])
+        #print("TARGETS:", targets.shape)
         eval_res = metrics_factory[self.metric](outputs['pred_rec'], targets, dataset)
         print('lexicon0: {0}: {1:.3f}'.format(self.metric, eval_res))
       pred_list, targ_list, score_list = RecPostProcess(outputs['pred_rec'], targets, outputs['pred_rec_score'], dataset)
@@ -138,6 +144,8 @@ class Evaluator(BaseEvaluator):
       images = imgs.to(self.device)
       if label_encs is not None:
         labels = label_encs.to(self.device)
+    
+    #print(label_encs)
 
     input_dict['images'] = images
     input_dict['rec_targets'] = labels

@@ -46,8 +46,10 @@ def build_output_control_points(num_control_points, margins):
   ctrl_pts_bottom = np.stack([ctrl_pts_x, ctrl_pts_y_bottom], axis=1)
   # ctrl_pts_top = ctrl_pts_top[1:-1,:]
   # ctrl_pts_bottom = ctrl_pts_bottom[1:-1,:]
+  #print("CPT", ctrl_pts_top.dtype)
+  #print("CPB", ctrl_pts_bottom.dtype)
   output_ctrl_pts_arr = np.concatenate([ctrl_pts_top, ctrl_pts_bottom], axis=0)
-  output_ctrl_pts = torch.Tensor(output_ctrl_pts_arr)
+  output_ctrl_pts = torch.tensor(output_ctrl_pts_arr, dtype=torch.float32)
   return output_ctrl_pts
 
 
@@ -62,6 +64,7 @@ class TPSSpatialTransformer(nn.Module):
 
     self.target_height, self.target_width = output_image_size
     target_control_points = build_output_control_points(num_control_points, margins)
+    #print("TCP", target_control_points.dtype)
     N = num_control_points
     # N = N - 4
 
@@ -79,12 +82,15 @@ class TPSSpatialTransformer(nn.Module):
     # create target cordinate matrix
     HW = self.target_height * self.target_width
     target_coordinate = list(itertools.product(range(self.target_height), range(self.target_width)))
-    target_coordinate = torch.Tensor(target_coordinate) # HW x 2
+    target_coordinate = torch.tensor(target_coordinate) # HW x 2
     Y, X = target_coordinate.split(1, dim = 1)
     Y = Y / (self.target_height - 1)
     X = X / (self.target_width - 1)
     target_coordinate = torch.cat([X, Y], dim = 1) # convert from (y, x) to (x, y)
     target_coordinate_partial_repr = compute_partial_repr(target_coordinate, target_control_points)
+    #print(target_coordinate_partial_repr.dtype) 
+    #print(target_coordinate.dtype)
+    #print('.')
     target_coordinate_repr = torch.cat([
       target_coordinate_partial_repr, torch.ones(HW, 1), target_coordinate
     ], dim = 1)
@@ -103,6 +109,8 @@ class TPSSpatialTransformer(nn.Module):
 
     Y = torch.cat([source_control_points, self.padding_matrix.expand(batch_size, 3, 2)], 1)
     mapping_matrix = torch.matmul(self.inverse_kernel, Y)
+    #print(self.target_coordinate_repr.dtype) 
+    #print(mapping_matrix.dtype)
     source_coordinate = torch.matmul(self.target_coordinate_repr, mapping_matrix)
 
     grid = source_coordinate.view(-1, self.target_height, self.target_width, 2)

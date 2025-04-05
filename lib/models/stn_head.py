@@ -80,7 +80,7 @@ class STNHead(nn.Module):
     elif self.activation == 'sigmoid':
       ctrl_points = -np.log(1. / ctrl_points - 1.)
     stn_fc2.weight.data.zero_()
-    stn_fc2.bias.data = torch.Tensor(ctrl_points).view(-1)
+    stn_fc2.bias.data = torch.tensor(ctrl_points).view(-1)
 
   def forward(self, x):
     x = self.stn_convnet(x)
