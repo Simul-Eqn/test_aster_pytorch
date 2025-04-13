@@ -99,6 +99,8 @@ def main(args):
                 args.height, args.width, args.batch_size, args.workers, False, args.keep_ratio, device='cuda' if args.cuda else 'cpu')
     
     #print("MAX LEN:", args.max_len)
+    train_dataset[0][0].show() 
+    test_dataset[0][0].show() 
 
     if args.evaluate:
         max_len = test_dataset.max_len
@@ -158,7 +160,7 @@ def main(args):
     # Optimizer
     param_groups = model.parameters()
     param_groups = filter(lambda p: p.requires_grad, param_groups)
-    optimizer = optim.Adadelta(param_groups, lr=args.lr, weight_decay=args.weight_decay)
+    optimizer = optim.AdamW(param_groups, lr=args.lr, weight_decay=args.weight_decay)
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[4,5], gamma=0.1)
 
     # Trainer

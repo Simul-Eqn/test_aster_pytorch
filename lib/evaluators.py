@@ -103,7 +103,10 @@ class BaseEvaluator(object):
       else:
         #print("PRED REC:", outputs['pred_rec'].shape)
         #print(outputs['pred_rec'][0])
-        #print("TARGETS:", targets.shape)
+        #print(outputs['pred_rec'][1])
+        #print("TARGETS:", targets.shape) 
+        #print(targets[0])
+        #print(targets[1])
         eval_res = metrics_factory[self.metric](outputs['pred_rec'], targets, dataset)
         print('lexicon0: {0}: {1:.3f}'.format(self.metric, eval_res))
       pred_list, targ_list, score_list = RecPostProcess(outputs['pred_rec'], targets, outputs['pred_rec_score'], dataset)

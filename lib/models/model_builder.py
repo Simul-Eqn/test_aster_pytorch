@@ -85,6 +85,9 @@ class ModelBuilder(nn.Module):
 
     if self.training:
       rec_pred = self.decoder([encoder_feats, rec_targets, rec_lengths])
+      #print("PRED_:", rec_pred)
+      #print("RECTARGETS:", rec_targets)
+      #print("RECLENGHTS:", rec_lengths)
       loss_rec = self.rec_crit(rec_pred, rec_targets, rec_lengths)
       return_dict['losses']['loss_rec'] = loss_rec
     else:

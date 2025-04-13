@@ -238,3 +238,7 @@ logs
 *.jpeg
 viz
 vis
+
+
+ignore
+OpenDyslexic_0_91_12_regular.otf

@@ -3,7 +3,7 @@ from fuzzywuzzy import process, fuzz
 from pathlib import Path 
 from PIL import Image, ImageDraw, ImageFont 
 import numpy as np 
-from string import printable 
+from string import ascii_letters
 
 class FontHandler(): 
     
@@ -68,9 +68,12 @@ class FontHandler():
         # let's treat low as the ideal font size 
         #print("FONT SIZE {}: WIDTH {}".format(low, self.get_text_width(text, low)))
         return low 
-    
 
 
+from data_generation import generate_text 
+
+# Constant for seeds
+MAX_SEED = 999999
 
 
 def generate_text_image(text:str, random_seed:int, allowed_fonts=['arial', 'calibri'], min_fontsize=15, max_fontsize=41, border_size=(5,5)): 
@@ -78,22 +81,36 @@ def generate_text_image(text:str, random_seed:int, allowed_fonts=['arial', 'cali
     
     # randomization 
     rng = np.random.default_rng(random_seed) 
-    fontsize = rng.integers(min_fontsize, max_fontsize) 
-    fontname = rng.choice(allowed_fonts) 
 
-    fonthandler = FontHandler(fontname=fontname)
-    text_wh = fonthandler.get_text_wh(text, fontsize)
-    img = Image.new('RGBA', (text_wh[0]+border_size[0]*2, text_wh[1]+border_size[1]*2), color=(255,255,255,0)) 
-    draw = ImageDraw.Draw(img) 
-    draw.text(border_size, text, font=fonthandler.font_with_size(fontsize), fill=(0,0,0,255)) # TODO: RANDOMIZE COLOUR / GRADIENT MAYBE?? USING A MASK OR SOMETHING 
+    def get_random_seed(): 
+        return rng.integers(1, MAX_SEED) 
+    
+    img = generate_text.generate_text_image(text, random_seed=get_random_seed(),
+                              use_text_gradient=True, text_gradient_seed=get_random_seed(),
+                              use_bg_gradient=True, bg_gradient_seed=get_random_seed(),
+                              use_shadow=False, #shadow_seed=get_random_seed(), shadow_blur_radius=1.0,
+                              random_lighter=False, lighter_seed=get_random_seed(),
+                              random_darker=False, darker_seed=get_random_seed(), 
+                              use_random_homography=True, random_homography_seed=get_random_seed(),
+                              use_curve_transforms=False, #, curve_transform_seed=get_random_seed(), curve_transform_probs=[0.7, 0.3, 0, 0], 
+                              use_poisson_noise=True, poisson_noise_seed=get_random_seed(), 
+                              arc_text=False) #arc text uses same random seed as random_seed 
 
     return img 
 
 
 
 # placeholder for the function to generate image & text label given just a fixed random seed and the vocabulary. (and max length perhaps)
-vocab = [c for c in printable if not c.isspace()] 
+#vocab = [c for c in printable if not c.isspace()] 
+vocab = list(ascii_letters)
+from functools import cache 
+@cache 
 def get_img_text(random_seed:int, max_len:int): 
-    text = 'hello' 
+    #random_seed = 10 
+    #max_len = 10 
+
+    rng = np.random.default_rng(random_seed) 
+    text = ''.join([rng.choice(vocab) for i in range(rng.integers(min(max_len, 4), max_len))]) 
+    
     return generate_text_image(text, random_seed).convert("RGB"), text
 

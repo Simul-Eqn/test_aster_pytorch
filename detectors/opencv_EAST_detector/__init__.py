@@ -1,0 +1,1 @@
+from .opencv_EAST_detector import * 

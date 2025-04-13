@@ -172,7 +172,11 @@ class AlignCollate(object):
   def __call__(self, batch):
     images, labels, lengths = zip(*batch)
     b_lengths = torch.IntTensor(lengths)
-    b_labels = torch.IntTensor(labels)
+    #print("LABELS:", labels)
+    #t1 = torch.IntTensor(labels) 
+    #t2 = torch.IntTensor(np.array(labels)) 
+    #print(t1-t2)
+    b_labels = torch.IntTensor(np.array(labels))
 
     imgH = self.imgH
     imgW = self.imgW

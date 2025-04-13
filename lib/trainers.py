@@ -70,10 +70,18 @@ class BaseTrainer(object):
 
       losses.update(total_loss.item(), batch_size)
 
+      #print(loss, self.loss_weights, total_loss)
+
       optimizer.zero_grad()
       total_loss.backward()
       if self.grad_clip > 0:
         torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.grad_clip)
+      
+      # check grad of first few layer to tune lr 
+      #print("FIRST LAYER WEIGHTS:")
+      #print(self.model.module.encoder.layer0[0].weight.grad) 
+      #print(self.model.module.encoder.layer1[0].weight.grad)
+
       optimizer.step()
 
       # # debug: check the parameters fixed or not.
@@ -101,7 +109,7 @@ class BaseTrainer(object):
                       losses.val, losses.avg))
 
       #====== TensorBoard logging ======#
-      if self.iters % print_freq*10 == 0:
+      if self.iters % print_freq*8 == 0:
         if train_tfLogger is not None:
           step = epoch * len(data_loader) + (i + 1)
           info = {
