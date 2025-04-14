@@ -113,22 +113,29 @@ def replace_image(img_in:Image.Image):
     return redraw_img(img_in, ress, show_bg=True, black_text=True), ress # to allow redrawing with different parameters '''
 
 
-def getTextBlocks(img:Image.Image): 
-    print("MODE:", img.mode)
+def getTextBlocks(img:Image.Image, use_opencv_east:bool): 
+    #print("MODE:", img.mode)
 
     ress = get_texts_bboxes_dirns(img) # each bbox is (left, top, right, bottom)
     
     blocks = [] 
 
     for (text, ltrb, dirn) in ress: 
+        #print("DIRN:", dirn)
 
         if dirn%2 != 0: continue # don't bother detecting sideways text 
+        
 
-        # GOT bounding box! now feed into ASTER model to get another text detection 
-        cropped_image = img.crop(ltrb) 
-        with tempfile.TemporaryFile(suffix='.png') as tempf: 
-            cropped_image.save(tempf) 
-            newtxt = run_demo(tempf)
+        if (not use_opencv_east): 
+
+            # GOT bounding box! now feed into ASTER model to get another text detection 
+            cropped_image = img.crop(ltrb) 
+            with tempfile.TemporaryFile(suffix='.png') as tempf: 
+                cropped_image.save(tempf) 
+                newtxt = run_demo(tempf)
+        
+        else: 
+            newtxt = text 
 
         blocks.append({'text': newtxt, 'left': ltrb[0], 'top': ltrb[1]}) 
     
@@ -145,7 +152,7 @@ if __name__=='__main__':
 
     #img.show() 
 
-    blocks = getTextBlocks(img)
+    blocks = getTextBlocks(img, False)
 
     print(blocks)
 

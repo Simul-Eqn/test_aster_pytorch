@@ -18,13 +18,16 @@ def main():
         # Decode base64 image
         image_data = base64.b64decode(data['image'])
         image = Image.open(io.BytesIO(image_data))
+
+        use_opencv_east = data.get('USE_OPENCV_EAST')
+        #print("USE OPENCV EAST: '{}' ({})".format(use_opencv_east, type(use_opencv_east)))
         
         # Perform some processing (example: just show the image size)
-        print(f"Image received: {image.size}")
-        image.show() 
+        #print(f"Image received: {image.size}")
+        #image.show() 
 
         # Return JSON response
-        response_data = {"textBlocks": getTextBlocks(image)}
+        response_data = {"textBlocks": getTextBlocks(image, use_opencv_east=use_opencv_east)}
         print("RESPONSE:\n", response_data)
 
         return jsonify(response_data)
